@@ -21,11 +21,19 @@ export default {
   methods: {
     addGridElement() {
       this.grid.push({
-        ...this.proto,
-        id: this.grid.length
+        id: this.grid.length,
+        percent: 0
       });
       //console.log(this.grid.length - 1);
       this.validatePercent(this.grid.length - 1);
+    },
+
+    avaliablePercent() {
+      this.grid
+        .map(ge => ge.percent)
+        .reduce((ge_a, ge_b) => {
+          return ge_a + ge_b;
+        });
     },
 
     // Metodo de validación: Valida las unidades del catalogo de gridElement en busca del elemento que no cumpla las reglas establecidas
@@ -54,7 +62,7 @@ export default {
         let temporal_current_percent = global_current_percent;
         temporal_current_percent += parseInt(gridElement.percent, 0);
 
-        //console.log(temporal_current_percent, this.global_max_percent);
+        console.log(temporal_current_percent, this.global_max_percent);
 
         // Calculo de desbordamiento / deuda
         let overflow = temporal_current_percent - this.global_max_percent;
@@ -64,21 +72,24 @@ export default {
           !this.auto_adjust
         ) {
           // Indicador de tipo de ajuste
-          //console.log(
-          // `Te pasaste por ${overflow}, Ajustando este ultimo valor!`
-          //);
+          console.log(
+            `Te pasaste por ${overflow}, Ajustando este ultimo valor!`
+          );
 
           // Metodo de ajuste por bloqueo: Se calcula el porcentaje restante global y se bloquea el elemento seleccionado para no exceder el limite
-          this.adjustLockflow(global_current_percent, index);
+          //this.adjustLockflow(global_current_percent, index);
+          gridElement.percent =
+            this.global_max_percent - global_current_percent;
+          //this.grid[index] = virtual_grid[index];
         } else {
           if (
             temporal_current_percent > this.global_max_percent &&
             this.auto_adjust
           ) {
             // Indicador de tipo de ajuste
-            //console.log(
-            //  `Te pasaste por ${overflow}, Ajustando todos los valores a conveniencia de este ultimo valor!`
-            //);
+            console.log(
+              `Te pasaste por ${overflow}, Ajustando todos los valores a conveniencia de este ultimo valor!`
+            );
 
             // Se asigna un desbordamiento
             adjustable_overflow = overflow;
@@ -126,9 +137,9 @@ export default {
       let debt = 0;
 
       // Indicador de ajuste
-      //console.log(
-      //  "Adjusting percents: " + unit_adjust + ", mod: " + mod_adjust
-      //);
+      console.log(
+        "Adjusting percents: " + unit_adjust + ", mod: " + mod_adjust
+      );
 
       // Negociación: Contexto en el que se decide la repartición de ajuste (-) <<Trusty Method>>
       if (this.adjust_type === "Equal")
@@ -152,21 +163,24 @@ export default {
           });
 
       // Negociación calculada por porcentajes: no esta lista
-      if (this.adjust_type === "Fair")
+      if (this.adjust_type === "Fair") {
+        let new_max_percent =
+          this.global_max_percent - this.grid[to_exclude_index].percent;
         this.grid
           .filter(gridElement => gridElement.id !== to_exclude_index)
           .map((gridElement, index) => {
             // Calcula el nuevo porcentaje maximo que será tomado como el 100% para todos
-            let new_max_percent = this.global_max_percent - gridElement.percent;
 
             // Se calcula por partes iguales la cantidad de desbordamiento y se ajustan
-            gridElement.percent =
+            gridElement.percent = Math.round(
               (parseInt(gridElement.percent, 0) / this.global_max_percent) *
-              new_max_percent;
+                new_max_percent
+            );
+            console.log(gridElement);
 
             return gridElement;
           });
-
+      }
       // Tras la primer negociación; la deuda generada requiere que se redistribuyan los porcentajes entre los posibles repitiendo el proceso
       this.adjustOverflow(debt, to_exclude_index);
     }
