@@ -1,2 +1,0 @@
-# VueAutoValue
-Created with CodeSandbox
