@@ -23,6 +23,7 @@ export default {
       this.validatePercent(this.grid.length - 1);
     },
     validatePercent(index) {
+      if (this.grid[index].percent > 100) this.grid[index].percent = 100;
       let virtual_grid = [...this.grid];
       //console.log(virtual_grid[index]);
       let virtual_grid_selected_element = { ...virtual_grid[index] };
@@ -70,6 +71,7 @@ export default {
       return virtual_grid[index];
     },
     adjustOverflow(overflow, to_exclude_index) {
+      if (overflow <= 0) return;
       let unit_adjust = Math.floor(
         overflow /
           this.grid.filter(ge => ge.percent > 0 && ge.id !== to_exclude_index)
@@ -80,6 +82,8 @@ export default {
         this.grid.filter(ge => ge.percent > 0 && ge.id !== to_exclude_index)
           .length;
 
+      let debt = 0;
+
       console.log(
         "Adjusting percents: " + unit_adjust + ", mod: " + mod_adjust
       );
@@ -88,8 +92,14 @@ export default {
         .map((gridElement, index) => {
           gridElement.percent -= unit_adjust;
           if (index < mod_adjust) gridElement.percent--;
+          if (gridElement.percent < 0) {
+            debt += gridElement.percent;
+            gridElement.percent = 0;
+          }
           return gridElement;
         });
+
+      this.adjustOverflow(debt, to_exclude_index);
     }
   },
   data() {
