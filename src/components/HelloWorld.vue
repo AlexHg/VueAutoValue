@@ -1,6 +1,11 @@
 <template>
   <div class="hello">
+    <input type="checkbox" v-model="auto_adjust" id="auto_adjust">
+    <label for="auto_adjust">Auto ajustar valores anteriores</label>
+    <br>
     <button @click="addGridElement">Agregar</button>
+    <br>
+
     <div v-for="gridElement in grid" :key="gridElement.id">
       <input type="number" v-model="gridElement.percent" @blur="validatePercent(gridElement.id)">
     </div>
@@ -105,7 +110,7 @@ export default {
   data() {
     return {
       global_max_percent: 100,
-      auto_adjust: true,
+      auto_adjust: false,
       proto: {
         id: 0,
         percent: 0
