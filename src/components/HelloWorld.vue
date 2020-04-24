@@ -177,8 +177,8 @@ export default {
       global_max_percent: 100,
       // Permisos de auto-ajuste
       auto_adjust: false,
-      // Prototipo de gridElement
       adjust_type: "Equal", // Equal || Fair
+      // Prototipo de gridElement
       proto: {
         id: 0,
         percent: 0
